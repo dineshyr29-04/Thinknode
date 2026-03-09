@@ -16,7 +16,7 @@ export function AppProvider({ children }) {
   const [payments] = useState(initialPayments);
   const [files] = useState(initialFiles);
   const [darkMode, setDarkMode] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifications] = useState([
     { id: 1, text: 'Invoice INV-002 is overdue', type: 'warning', time: '2h ago' },
     { id: 2, text: 'Workflow "Form Submit → Slack" paused', type: 'error', time: '5h ago' },

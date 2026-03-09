@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { Bell, Sun, Moon, Search, X } from 'lucide-react';
+import { Bell, Sun, Moon, Search, X, Menu } from 'lucide-react';
 
 const pageTitles = {
   '/': 'Dashboard',
@@ -15,7 +15,7 @@ const pageTitles = {
 };
 
 export default function Navbar() {
-  const { darkMode, toggleDark, notifications } = useApp();
+  const { darkMode, toggleDark, notifications, setSidebarOpen } = useApp();
   const location = useLocation();
   const [showNotif, setShowNotif] = useState(false);
   const [search, setSearch] = useState('');
@@ -24,7 +24,15 @@ export default function Navbar() {
   const unread = notifications.length;
 
   return (
-    <header className="sticky top-0 z-30 h-16 flex items-center gap-4 px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700/50">
+    <header className="sticky top-0 z-30 h-16 flex items-center gap-4 px-4 sm:px-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700/50">
+      {/* Mobile hamburger */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="lg:hidden p-2 -ml-1 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+      >
+        <Menu size={20} />
+      </button>
+
       {/* Page title */}
       <div className="flex-1">
         <h1 className="text-lg font-semibold text-slate-800 dark:text-white">{title}</h1>
