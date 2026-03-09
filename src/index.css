@@ -9,7 +9,7 @@
     @apply border-slate-200 dark:border-slate-700;
   }
   body {
-    @apply bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans;
+    @apply bg-violet-50 dark:bg-[#0f1117] text-slate-900 dark:text-slate-100 font-sans;
   }
 }
 

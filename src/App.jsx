@@ -16,7 +16,7 @@ import clsx from 'clsx';
 function Layout() {
   const { sidebarOpen } = useApp();
   return (
-    <div className="flex h-screen min-w-[100vw] bg-slate-50 dark:bg-slate-900 overflow-hidden">
+    <div className="flex h-screen min-w-[100vw] bg-violet-50 dark:bg-[#0f1117] overflow-hidden">
       <Sidebar />
       <div className={clsx('flex flex-col flex-1 min-w-0 transition-all duration-300')}>
         <Navbar />
