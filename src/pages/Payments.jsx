@@ -120,7 +120,7 @@ export default function Payments() {
                   <td className="px-5 py-3.5 text-slate-700 dark:text-slate-200 font-medium">{p.client}</td>
                   <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{p.service}</td>
                   <td className="px-5 py-3.5 font-semibold text-slate-800 dark:text-white">₹{p.amount.toLocaleString()}</td>
-                  <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{p.dueDate}</td>
+                  <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{p.due}</td>
                   <td className="px-5 py-3.5">
                     <span className={clsx('text-xs px-2.5 py-1 rounded-full font-medium', statusBadge[p.status])}>{p.status}</span>
                   </td>
