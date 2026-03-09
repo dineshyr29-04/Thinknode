@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppProvider } from './context/AppContext';
+import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar';
+import Dashboard from './pages/Dashboard';
+import Clients from './pages/Clients';
+import Projects from './pages/Projects';
+import Services from './pages/Services';
+import Automations from './pages/Automations';
+import Files from './pages/Files';
+import Payments from './pages/Payments';
+import Settings from './pages/Settings';
+import { useApp } from './context/AppContext';
+import clsx from 'clsx';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+function Layout() {
+  const { sidebarOpen } = useApp();
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden">
+      <Sidebar />
+      <div className={clsx('flex flex-col flex-1 min-w-0 transition-all duration-300')}>
+        <Navbar />
+        <main className="flex-1 overflow-y-auto">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/automations" element={<Automations />} />
+            <Route path="/files" element={<Files />} />
+            <Route path="/payments" element={<Payments />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
       </div>
-      <h1>Thinknode</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <BrowserRouter>
+      <AppProvider>
+        <Layout />
+      </AppProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
