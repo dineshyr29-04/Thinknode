@@ -14,16 +14,25 @@
 }
 
 @layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: #475569 transparent;
+  .scrollbar-modern::-webkit-scrollbar {
+    width: 5px; /* Keeps it very thin */
   }
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
+
+  .scrollbar-modern::-webkit-scrollbar-track {
+    background: transparent; /* No track for a cleaner look */
   }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: #475569;
-    border-radius: 2px;
+
+  .scrollbar-modern::-webkit-scrollbar-thumb {
+    /* Pure white with a subtle "colorful" glow */
+    background: white;
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Optional: Change color on hover for a dynamic feel */
+  .scrollbar-modern::-webkit-scrollbar-thumb:hover {
+    background: #f8fafc; /* Slightly off-white */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   }
 }
 
