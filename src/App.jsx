@@ -10,6 +10,7 @@ import Automations from './pages/Automations';
 import Files from './pages/Files';
 import Payments from './pages/Payments';
 import Settings from './pages/Settings';
+import InvoiceGenerator from './pages/InvoiceGenerator';
 import { useApp } from './context/AppContext';
 import clsx from 'clsx';
 
@@ -30,6 +31,7 @@ function Layout() {
             <Route path="/files" element={<Files />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/invoice" element={<InvoiceGenerator />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

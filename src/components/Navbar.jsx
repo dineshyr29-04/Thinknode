@@ -12,6 +12,7 @@ const pageTitles = {
   '/automations': 'Automations',
   '/files': 'Files',
   '/payments': 'Payments',
+  '/invoice': 'Invoice Generator',
   '/settings': 'Settings',
 };
 

@@ -3,7 +3,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import {
   LayoutDashboard, Users, FolderKanban, Layers, Zap,
-  Files, CreditCard, Settings, X
+  Files, CreditCard, Settings, X, Receipt
 } from 'lucide-react';
 import clsx from 'clsx';
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { to: '/automations', label: 'Automations', icon: Zap },
   { to: '/files', label: 'Files', icon: Files },
   { to: '/payments', label: 'Payments', icon: CreditCard },
+  { to: '/invoice', label: 'Invoice', icon: Receipt },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
