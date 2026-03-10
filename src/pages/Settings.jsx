@@ -208,9 +208,9 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => setShowPw(p => ({ ...p, [key]: !p[key] }))}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                className="absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-transparent border-none"
               >
-                {showPw[key] ? <EyeOff size={14} /> : <Eye size={14} />}
+                {showPw[key] ? <EyeOff size={10} /> : <Eye size={14} />}
               </button>
             </div>
           </Field>
