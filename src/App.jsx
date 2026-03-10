@@ -20,14 +20,7 @@ function Layout() {
       <Sidebar />
       <div className={clsx('flex flex-col flex-1 min-w-0 transition-all duration-300')}>
         <Navbar />
-        <main className="flex-1 overflow-y-auto 
-        [&::-webkit-scrollbar]:w-[10px]
-        [&::webkit-scrollbar-track]:bg-transparent
-        [&::webkit-scrollbar-track]:bg-slate-400
-        [&::webkit-scrollbar-track]:rounded-full
-        [&::-webkit-scrollbar-thumb]:shadow-[0_0_5px_rgba(255,255,255,0.5)]
-        [&::-webkit-scrollbar-thumb]:bg-black
-        [&::-webkit-scrollbar-thumb]:rounded-full">
+        <main className="scrollbar-modern flex-1 overflow-y-auto">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/clients" element={<Clients />} />
