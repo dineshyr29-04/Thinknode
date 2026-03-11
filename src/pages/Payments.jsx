@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { DollarSign, TrendingUp, Clock, CheckCircle, Plus, X, ChevronDown, Trash2 } from 'lucide-react';
@@ -60,6 +60,52 @@ function StatusDropdown({ paymentId, current, onUpdate }) {
               <button
                 key={s}
                 onClick={() => { onUpdate(paymentId, { status: s }); setOpen(false); }}
+                className={clsx(
+                  'w-full text-left text-xs px-3 py-2 flex items-center gap-2 transition-colors',
+                  s === current
+                    ? clsx('font-semibold', st.active, st.text)
+                    : clsx('text-slate-500 dark:text-slate-400', st.hover)
+                )}
+              >
+                <span className={clsx('w-2 h-2 rounded-full flex-shrink-0', st.dot)} />
+                {s}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ClientStatusDropdown({ clientId, current, onUpdate }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative inline-block">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={clsx('flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium transition-all hover:opacity-80', statusBadge[current])}
+      >
+        {current}
+        <ChevronDown size={10} className={clsx('transition-transform', open && 'rotate-180')} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1.5 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 py-1 overflow-hidden">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 px-3 pt-2 pb-1">Client status</p>
+          {STATUSES.map(s => {
+            const st = statusItemStyles[s];
+            return (
+              <button
+                key={s}
+                onClick={() => { onUpdate(clientId, s); setOpen(false); }}
                 className={clsx(
                   'w-full text-left text-xs px-3 py-2 flex items-center gap-2 transition-colors',
                   s === current
@@ -144,10 +190,16 @@ function AddPaymentModal({ clients, onClose, onSave }) {
 }
 
 export default function Payments() {
-  const { payments, updatePayment, deletePayment, addPayment, clients, isAdmin, revenueData } = useApp();
+  const { payments, updatePayment, deletePayment, addPayment, clients, isAdmin, revenueData, updateClientPaymentStatus } = useApp();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [addModal, setAddModal] = useState(false);
+
+  const clientMap = useMemo(() => {
+    const map = new Map();
+    clients.forEach(c => map.set(c.name, c));
+    return map;
+  }, [clients]);
 
   const filtered = payments.filter(p => {
     const matchSearch = p.client.toLowerCase().includes(search.toLowerCase()) || p.id.includes(search);
@@ -200,6 +252,31 @@ export default function Payments() {
         </ResponsiveContainer>
       </div>
 
+      {/* Client Payment Controls */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Client Payment Status</h3>
+          <p className="text-xs text-slate-400 mt-0.5">Manage paid / unpaid status directly from client details</p>
+        </div>
+        <div className="divide-y divide-slate-50 dark:divide-slate-700/50">
+          {clients.length === 0 && (
+            <div className="text-center py-10 text-slate-400 text-sm">No clients added yet.</div>
+          )}
+          {clients.map(c => (
+            <div key={c.id} className="px-5 py-3.5 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{c.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{c.company || 'No company'} · {c.email || 'No email'}</p>
+              </div>
+              {isAdmin
+                ? <ClientStatusDropdown clientId={c.id} current={c.paymentStatus || 'Yet to Pay'} onUpdate={updateClientPaymentStatus} />
+                : <span className={clsx('text-xs px-2.5 py-1 rounded-full font-medium', statusBadge[c.paymentStatus] ?? statusBadge['Yet to Pay'])}>{c.paymentStatus || 'Yet to Pay'}</span>
+              }
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Invoice Table */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-700">
@@ -232,12 +309,15 @@ export default function Payments() {
         </div>
         {/* ── Mobile card view (xs → sm) ── */}
         <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700/50">
-          {filtered.map(p => (
+          {filtered.map(p => {
+            const linked = clientMap.get(p.client);
+            return (
             <div key={p.id} className="px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="min-w-0">
                   <span className="font-mono text-xs font-semibold text-blue-600 dark:text-blue-400">{p.id}</span>
                   <p className="text-sm font-semibold text-slate-800 dark:text-white mt-0.5 truncate">{p.client}</p>
+                  {linked?.email && <p className="text-[11px] text-slate-400 truncate">{linked.email}</p>}
                   <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{p.service}</p>
                 </div>
                 {isAdmin && (
@@ -260,7 +340,8 @@ export default function Payments() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
           {filtered.length === 0 && (
             <div className="text-center py-10 text-slate-400 text-sm">No invoices found.</div>
           )}
@@ -281,10 +362,15 @@ export default function Payments() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
-              {filtered.map(p => (
+              {filtered.map(p => {
+                const linked = clientMap.get(p.client);
+                return (
                 <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                   <td className="px-5 py-3.5 font-mono text-xs text-blue-600 dark:text-blue-400 font-semibold">{p.id}</td>
-                  <td className="px-5 py-3.5 text-slate-700 dark:text-slate-200 font-medium">{p.client}</td>
+                  <td className="px-5 py-3.5">
+                    <p className="text-slate-700 dark:text-slate-200 font-medium">{p.client}</p>
+                    <p className="text-[11px] text-slate-400">{linked?.company || 'No company'}{linked?.email ? ` · ${linked.email}` : ''}</p>
+                  </td>
                   <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{p.service}</td>
                   <td className="px-5 py-3.5 font-semibold text-slate-800 dark:text-white">₹{p.amount.toLocaleString()}</td>
                   <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{p.due}</td>
@@ -305,7 +391,8 @@ export default function Payments() {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
           {filtered.length === 0 && (
