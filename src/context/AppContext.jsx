@@ -196,6 +196,7 @@ export function AppProvider({ children }) {
       'Frontend Development': '#8b5cf6',
       'E-Poster Design': '#ec4899',
       'n8n Automation': '#10b981',
+      'Video Editing': '#f97316',
     };
     const map = {};
     payments.filter(p => p.status === 'Paid').forEach(p => {

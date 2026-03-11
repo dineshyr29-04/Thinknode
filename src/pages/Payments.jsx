@@ -6,6 +6,7 @@ import { DollarSign, TrendingUp, Clock, CheckCircle, Plus, X, ChevronDown, Trash
 import clsx from 'clsx';
 
 const STATUSES = ['Paid', 'Delayed', 'Yet to Pay'];
+const SERVICE_OPTIONS = ['Web Development', 'Frontend Development', 'E-Poster Design', 'n8n Automation', 'Video Editing'];
 
 const statusItemStyles = {
   'Paid':       { dot: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-400', hover: 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20', active: 'bg-emerald-50 dark:bg-emerald-900/20' },
@@ -115,6 +116,12 @@ function AddPaymentModal({ clients, onClose, onSave }) {
                 {STATUSES.map(s => <option key={s}>{s}</option>)}
               </select>
             </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 block mb-1">Service Type</label>
+            <select value={form.service} onChange={e => set('service', e.target.value)} className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+              {SERVICE_OPTIONS.map(s => <option key={s}>{s}</option>)}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

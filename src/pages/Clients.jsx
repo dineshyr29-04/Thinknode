@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Plus, Search, Edit3, Trash2, Eye, X, Mail, Phone, Building2, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 
-const serviceOptions = ['Web Development', 'Frontend Development', 'E-Poster Design', 'n8n Automation'];
+const serviceOptions = ['Web Development', 'Frontend Development', 'E-Poster Design', 'n8n Automation', 'Video Editing'];
 
 const statusColors = {
   Active: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400',
