@@ -22,7 +22,7 @@ export default function StatsCard({ title, value, subtitle, icon: Icon, color, t
               ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400'
               : 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'
           )}>
-            {trend >= 0 ? '+' : ''}{trend}%
+            
           </span>
         )}
       </div>
