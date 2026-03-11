@@ -22,6 +22,10 @@ const colColors = {
   Delivered: 'border-t-emerald-500',
 };
 
+
+
+
+
 const colCountColors = {
   Lead: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
   Planning: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',

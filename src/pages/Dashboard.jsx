@@ -41,6 +41,21 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const PieRevenueTooltip = ({ active, payload }) => {
+  if (!active || !payload?.length) return null;
+
+  const point = payload[0]?.payload;
+  if (!point) return null;
+
+  return (
+    <div className="min-w-[148px] rounded-xl border border-slate-200/80 bg-white/95 px-3 py-2.5 shadow-xl backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95">
+      <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">{point.name}</p>
+      <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white">₹{point.value.toLocaleString()}</p>
+      <p className="text-[11px] text-slate-500 dark:text-slate-400">{point.percent}% of revenue</p>
+    </div>
+  );
+};
+
 export default function Dashboard() {
   const { stats, workflows, projects, clients, syncLog, dismissLog, clearLog, serviceBreakdown, revenueData } = useApp();
 
@@ -92,21 +107,23 @@ export default function Dashboard() {
             </div>
             <span className="text-xs text-emerald-500 font-medium bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-lg">↑ 24% this month</span>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={revenueData}>
-              <defs>
-                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `₹${v / 1000}K`} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} fill="url(#revGrad)" name="Revenue" />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="h-[220px] sm:h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueData}>
+                <defs>
+                  <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `₹${v / 1000}K`} />
+                <Tooltip content={<CustomTooltip />} />
+                <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} fill="url(#revGrad)" name="Revenue" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Service Breakdown Pie */}
@@ -128,17 +145,28 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
-              <ResponsiveContainer width="100%" height={160}>
-                <PieChart>
-                  <Pie data={serviceBreakdown} cx="50%" cy="50%" innerRadius={45} outerRadius={70} dataKey="value" paddingAngle={3}>
-                    {serviceBreakdown.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                  </Pie>
-                  <Tooltip formatter={v => `₹${(v / 1000).toFixed(0)}K`} contentStyle={{ background: '#1e293b', border: 'none', borderRadius: '8px', fontSize: '12px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="h-[190px] sm:h-[210px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={serviceBreakdown}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      activeOuterRadius={78}
+                      dataKey="value"
+                      paddingAngle={3}
+                    >
+                      {serviceBreakdown.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip content={<PieRevenueTooltip />} wrapperStyle={{ zIndex: 30 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                 {serviceBreakdown.map(s => (
-                  <div key={s.name} className="flex items-center gap-1.5">
+                  <div key={s.name} className="flex items-center gap-1.5 min-w-0">
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }} />
                     <span className="text-xs text-slate-500 dark:text-slate-400 truncate">{s.name}: ₹{(s.value / 1000).toFixed(0)}K</span>
                   </div>
