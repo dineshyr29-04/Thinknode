@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { DollarSign, TrendingUp, Clock, CheckCircle, Plus, X, ChevronDown, Trash2 } from 'lucide-react';
+import { DollarSign, TrendingUp, Clock, CheckCircle, Plus, X, ChevronDown, Trash2, CreditCard, Banknote, Wifi, HelpCircle } from 'lucide-react';
 
 import clsx from 'clsx';
 
@@ -145,7 +145,11 @@ function ClientStatusDropdown({ clientId, current, onUpdate }) {
             return (
               <button
                 key={s}
-                onClick={() => { onUpdate(clientId, s); setOpen(false); }}
+                onClick={() => {
+                  if (s === 'Paid') { onSelectPaid?.(clientId); }
+                  else { onUpdate(clientId, s); }
+                  setOpen(false);
+                }}
                 className={clsx(
                   'w-full text-left text-xs px-3 py-2 flex items-center gap-2 transition-colors',
                   s === current
@@ -160,6 +164,127 @@ function ClientStatusDropdown({ clientId, current, onUpdate }) {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+const PAYMENT_METHODS = [
+  { label: 'Cash',   icon: Banknote,  color: 'emerald' },
+  { label: 'Online', icon: Wifi,      color: 'blue' },
+  { label: 'Card',   icon: CreditCard, color: 'violet' },
+  { label: 'Others', icon: HelpCircle, color: 'slate' },
+];
+
+function MarkClientPaidModal({ clientName, onClose, onConfirm }) {
+  const [form, setForm] = useState({ amount: '', method: 'Cash', cardName: '', bankName: '', othersText: '' });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleConfirm = () => {
+    if (!form.amount) return;
+    let detail = '';
+    if (form.method === 'Card')   detail = [form.cardName, form.bankName].filter(Boolean).join(' · ');
+    if (form.method === 'Others') detail = form.othersText;
+    onConfirm({ amount: Number(form.amount), method: form.method, detail });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-200 dark:border-slate-700">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-white">Mark as Paid</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{clientName}</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><X size={18} /></button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Amount */}
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 block mb-1.5">Amount Received (₹)</label>
+            <input
+              type="number" min="0"
+              value={form.amount}
+              onChange={e => set('amount', e.target.value)}
+              placeholder="e.g. 25000"
+              className="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          {/* Payment method */}
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 block mb-2">Payment Method</label>
+            <div className="grid grid-cols-4 gap-2">
+              {PAYMENT_METHODS.map(({ label, icon: Icon, color }) => (
+                <button
+                  key={label}
+                  onClick={() => set('method', label)}
+                  className={clsx(
+                    'flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 text-xs font-semibold transition-all',
+                    form.method === label
+                      ? `border-${color}-500 bg-${color}-50 dark:bg-${color}-900/20 text-${color}-700 dark:text-${color}-400`
+                      : 'border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500'
+                  )}
+                >
+                  <Icon size={18} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Card fields */}
+          {form.method === 'Card' && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 block mb-1.5">Card Name</label>
+                <input
+                  value={form.cardName}
+                  onChange={e => set('cardName', e.target.value)}
+                  placeholder="VISA / Mastercard"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 block mb-1.5">Bank Name</label>
+                <input
+                  value={form.bankName}
+                  onChange={e => set('bankName', e.target.value)}
+                  placeholder="HDFC / SBI"
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Others field */}
+          {form.method === 'Others' && (
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 block mb-1.5">Specify Payment Method</label>
+              <input
+                value={form.othersText}
+                onChange={e => set('othersText', e.target.value)}
+                placeholder="e.g. Cheque, Crypto, Bank Transfer…"
+                className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-slate-500"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700">
+          <button onClick={onClose} className="flex-1 px-4 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Cancel</button>
+          <button
+            onClick={handleConfirm}
+            disabled={!form.amount}
+            className="flex-1 px-4 py-2 text-sm rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold transition-colors"
+          >
+            Confirm Payment
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -230,10 +355,17 @@ function AddPaymentModal({ clients, onClose, onSave }) {
 }
 
 export default function Payments() {
-  const { payments, updatePayment, deletePayment, addPayment, clients, isAdmin, revenueData, updateClientPaymentStatus } = useApp();
+  const { payments, updatePayment, deletePayment, addPayment, clients, isAdmin, revenueData, updateClientPaymentStatus, updateClient } = useApp();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [addModal, setAddModal] = useState(false);
+  const [paidClientTarget, setPaidClientTarget] = useState(null); // clientId waiting for paid confirmation
+
+  const handleClientPaidConfirm = ({ amount, method, detail }) => {
+    updateClientPaymentStatus(paidClientTarget, 'Paid');
+    updateClient(paidClientTarget, { paymentMode: method, paymentDetail: detail, paidAmount: amount });
+    setPaidClientTarget(null);
+  };
 
   const clientMap = useMemo(() => {
     const map = new Map();
@@ -308,10 +440,18 @@ export default function Payments() {
                 <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{c.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{c.company || 'No company'} · {c.email || 'No email'}</p>
               </div>
-              {isAdmin
-                ? <ClientStatusDropdown clientId={c.id} current={c.paymentStatus || 'Yet to Pay'} onUpdate={updateClientPaymentStatus} />
-                : <span className={clsx('text-xs px-2.5 py-1 rounded-full font-medium', statusBadge[c.paymentStatus] ?? statusBadge['Yet to Pay'])}>{c.paymentStatus || 'Yet to Pay'}</span>
-              }
+              <div className="text-right">
+                {isAdmin
+                  ? <ClientStatusDropdown clientId={c.id} current={c.paymentStatus || 'Yet to Pay'} onUpdate={updateClientPaymentStatus} onSelectPaid={id => setPaidClientTarget(id)} />
+                  : <span className={clsx('text-xs px-2.5 py-1 rounded-full font-medium', statusBadge[c.paymentStatus] ?? statusBadge['Yet to Pay'])}>{c.paymentStatus || 'Yet to Pay'}</span>
+                }
+                {c.paymentStatus === 'Paid' && c.paymentMode && (
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1">
+                    via {c.paymentMode}{c.paymentDetail ? ` · ${c.paymentDetail}` : ''}
+                    {c.paidAmount ? ` · ₹${Number(c.paidAmount).toLocaleString()}` : ''}
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -443,6 +583,13 @@ export default function Payments() {
 
       {addModal && (
         <AddPaymentModal clients={clients} onClose={() => setAddModal(false)} onSave={addPayment} />
+      )}
+      {paidClientTarget && (
+        <MarkClientPaidModal
+          clientName={clients.find(c => c.id === paidClientTarget)?.name ?? ''}
+          onClose={() => setPaidClientTarget(null)}
+          onConfirm={handleClientPaidConfirm}
+        />
       )}
     </div>
   );
