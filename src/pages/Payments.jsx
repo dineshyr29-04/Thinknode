@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { DollarSign, TrendingUp, Clock, CheckCircle, Plus, X, ChevronDown, Trash2, CreditCard, Banknote, Wifi, HelpCircle } from 'lucide-react';
@@ -36,18 +37,15 @@ function StatusDropdown({ paymentId, current, onUpdate }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, right: 0 });
   const btnRef = useRef(null);
-  const panelRef = useRef(null);
 
   useEffect(() => {
+    if (!open) return;
     const handler = e => {
-      if (
-        btnRef.current && !btnRef.current.contains(e.target) &&
-        panelRef.current && !panelRef.current.contains(e.target)
-      ) setOpen(false);
+      if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, []);
+  }, [open]);
 
   const handleToggle = () => {
     if (!open && btnRef.current) {
@@ -67,9 +65,9 @@ function StatusDropdown({ paymentId, current, onUpdate }) {
         {current}
         <ChevronDown size={10} className={clsx('transition-transform', open && 'rotate-180')} />
       </button>
-      {open && (
+      {open && createPortal(
         <div
-          ref={panelRef}
+          onMouseDown={e => e.stopPropagation()}
           style={{ position: 'fixed', top: `${pos.top}px`, right: `${pos.right}px`, zIndex: 9999 }}
           className="w-36 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1 overflow-hidden"
         >
@@ -92,7 +90,8 @@ function StatusDropdown({ paymentId, current, onUpdate }) {
               </button>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -102,18 +101,15 @@ function ClientStatusDropdown({ clientId, current, onUpdate, onSelectPaid }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, right: 0 });
   const btnRef = useRef(null);
-  const panelRef = useRef(null);
 
   useEffect(() => {
+    if (!open) return;
     const handler = e => {
-      if (
-        btnRef.current && !btnRef.current.contains(e.target) &&
-        panelRef.current && !panelRef.current.contains(e.target)
-      ) setOpen(false);
+      if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, []);
+  }, [open]);
 
   const handleToggle = () => {
     if (!open && btnRef.current) {
@@ -133,9 +129,9 @@ function ClientStatusDropdown({ clientId, current, onUpdate, onSelectPaid }) {
         {current}
         <ChevronDown size={10} className={clsx('transition-transform', open && 'rotate-180')} />
       </button>
-      {open && (
+      {open && createPortal(
         <div
-          ref={panelRef}
+          onMouseDown={e => e.stopPropagation()}
           style={{ position: 'fixed', top: `${pos.top}px`, right: `${pos.right}px`, zIndex: 9999 }}
           className="w-36 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1 overflow-hidden"
         >
@@ -162,7 +158,8 @@ function ClientStatusDropdown({ clientId, current, onUpdate, onSelectPaid }) {
               </button>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
