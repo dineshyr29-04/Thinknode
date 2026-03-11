@@ -17,6 +17,8 @@ export const frontendApps = [];
 
 export const posterProjects = [];
 
+export const videoProjects = [];
+
 // ─── FILES ────────────────────────────────────────────────────────────────────
 export const files = [];
 

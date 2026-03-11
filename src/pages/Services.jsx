@@ -1,5 +1,5 @@
-import { Globe, AppWindow, Image, Zap, ExternalLink, CheckCircle, Clock, AlertCircle, Download } from 'lucide-react';
-import { webProjects, frontendApps, posterProjects, workflows } from '../data/dummyData';
+import { Globe, AppWindow, Image, Zap, ExternalLink, CheckCircle, Clock, AlertCircle, Download, Clapperboard } from 'lucide-react';
+import { webProjects, frontendApps, posterProjects, videoProjects, workflows } from '../data/dummyData';
 import clsx from 'clsx';
 
 const deployStatus = {
@@ -153,6 +153,39 @@ export default function Services() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Video Editing */}
+      <section>
+        <SectionHeader icon={Clapperboard} color="bg-orange-600" title="Video Editing" count={videoProjects.length} />
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {videoProjects.map(v => {
+            const st = deployStatus[v.status] ?? deployStatus['In Progress'];
+            return (
+              <div key={v.id} className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{v.name}</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">{v.client}</p>
+                  </div>
+                  <span className={clsx('flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium', st.style)}>
+                    {st.icon}{v.status}
+                  </span>
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Format</span>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">{v.format ?? 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Duration</span>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">{v.duration ?? 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>

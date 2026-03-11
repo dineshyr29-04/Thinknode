@@ -4,9 +4,10 @@ import { useApp } from '../context/AppContext';
 
 const SERVICE_PRESETS = [
   { label: 'Web Development',  rate: 20000 },
-  { label: 'Frontend',         rate: 2000  },
-  { label: 'Automation',       rate: 3000  },
-  { label: 'Poster Design',    rate: 100   },
+  { label: 'Frontend Development', rate: 2000 },
+  { label: 'n8n Automation',   rate: 3000  },
+  { label: 'E-Poster Design',  rate: 100   },
+  { label: 'Video Editing',    rate: 2500  },
   { label: 'Custom / Other',   rate: 0     },
 ];
 
