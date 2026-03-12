@@ -33,7 +33,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-function StatusDropdown({ paymentId, current, onUpdate }) {
+function StatusDropdown({ id, current, onUpdate, onSelectPaid, heading = 'Select status' }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, right: 0 });
   const btnRef = useRef(null);
@@ -71,79 +71,15 @@ function StatusDropdown({ paymentId, current, onUpdate }) {
           style={{ position: 'fixed', top: `${pos.top}px`, right: `${pos.right}px`, zIndex: 9999 }}
           className="w-36 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1 overflow-hidden"
         >
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 px-3 pt-2 pb-1">Select status</p>
-          {STATUSES.map(s => {
-            const st = statusItemStyles[s];
-            return (
-              <button
-                key={s}
-                onClick={() => { onUpdate(paymentId, { status: s }); setOpen(false); }}
-                className={clsx(
-                  'w-full text-left text-xs px-3 py-2 flex items-center gap-2 transition-colors',
-                  s === current
-                    ? clsx('font-semibold', st.active, st.text)
-                    : clsx('text-slate-500 dark:text-slate-400', st.hover)
-                )}
-              >
-                <span className={clsx('w-2 h-2 rounded-full flex-shrink-0', st.dot)} />
-                {s}
-              </button>
-            );
-          })}
-        </div>,
-        document.body
-      )}
-    </div>
-  );
-}
-
-function ClientStatusDropdown({ clientId, current, onUpdate, onSelectPaid }) {
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, right: 0 });
-  const btnRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = e => {
-      if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect();
-      setPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
-    }
-    setOpen(o => !o);
-  };
-
-  return (
-    <div className="relative inline-block">
-      <button
-        ref={btnRef}
-        onClick={handleToggle}
-        className={clsx('flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium transition-all hover:opacity-80', statusBadge[current])}
-      >
-        {current}
-        <ChevronDown size={10} className={clsx('transition-transform', open && 'rotate-180')} />
-      </button>
-      {open && createPortal(
-        <div
-          onMouseDown={e => e.stopPropagation()}
-          style={{ position: 'fixed', top: `${pos.top}px`, right: `${pos.right}px`, zIndex: 9999 }}
-          className="w-36 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1 overflow-hidden"
-        >
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 px-3 pt-2 pb-1">Client status</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 px-3 pt-2 pb-1">{heading}</p>
           {STATUSES.map(s => {
             const st = statusItemStyles[s];
             return (
               <button
                 key={s}
                 onClick={() => {
-                  if (s === 'Paid') { onSelectPaid?.(clientId); }
-                  else { onUpdate(clientId, s); }
+                  if (s === 'Paid' && onSelectPaid) { onSelectPaid(id); }
+                  else { onUpdate(id, s); }
                   setOpen(false);
                 }}
                 className={clsx(
@@ -356,12 +292,18 @@ export default function Payments() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [addModal, setAddModal] = useState(false);
-  const [paidClientTarget, setPaidClientTarget] = useState(null); // clientId waiting for paid confirmation
+  const [paidClientTarget, setPaidClientTarget] = useState(null);
+  const [paidInvoiceTarget, setPaidInvoiceTarget] = useState(null);
 
   const handleClientPaidConfirm = ({ amount, method, detail }) => {
     updateClientPaymentStatus(paidClientTarget, 'Paid');
     updateClient(paidClientTarget, { paymentMode: method, paymentDetail: detail, paidAmount: amount });
     setPaidClientTarget(null);
+  };
+
+  const handleInvoicePaidConfirm = ({ amount, method, detail }) => {
+    updatePayment(paidInvoiceTarget, { status: 'Paid', paymentMode: method, paymentDetail: detail, paidAmount: amount });
+    setPaidInvoiceTarget(null);
   };
 
   const clientMap = useMemo(() => {
@@ -439,7 +381,7 @@ export default function Payments() {
               </div>
               <div className="text-right">
                 {isAdmin
-                  ? <ClientStatusDropdown clientId={c.id} current={c.paymentStatus || 'Yet to Pay'} onUpdate={updateClientPaymentStatus} onSelectPaid={id => setPaidClientTarget(id)} />
+                  ? <StatusDropdown id={c.id} current={c.paymentStatus || 'Yet to Pay'} onUpdate={updateClientPaymentStatus} onSelectPaid={id => setPaidClientTarget(id)} heading="Client status" />
                   : <span className={clsx('text-xs px-2.5 py-1 rounded-full font-medium', statusBadge[c.paymentStatus] ?? statusBadge['Yet to Pay'])}>{c.paymentStatus || 'Yet to Pay'}</span>
                 }
                 {c.paymentStatus === 'Paid' && c.paymentMode && (
@@ -511,11 +453,16 @@ export default function Payments() {
                 <div className="flex items-center gap-2">
                   {p.due && <span className="text-[11px] text-slate-400">Due {p.due}</span>}
                   {isAdmin
-                    ? <StatusDropdown paymentId={p.id} current={p.status} onUpdate={updatePayment} />
+                    ? <StatusDropdown id={p.id} current={p.status} onUpdate={(id, s) => updatePayment(id, { status: s })} onSelectPaid={id => setPaidInvoiceTarget(id)} />
                     : <span className={clsx('text-xs px-2.5 py-1 rounded-full font-medium', statusBadge[p.status])}>{p.status}</span>
                   }
                 </div>
               </div>
+              {p.status === 'Paid' && p.paymentMode && (
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1.5">
+                  via {p.paymentMode}{p.paymentDetail ? ` · ${p.paymentDetail}` : ''}{p.paidAmount ? ` · ₹${Number(p.paidAmount).toLocaleString()}` : ''}
+                </p>
+              )}
             </div>
             );
           })}
@@ -553,9 +500,14 @@ export default function Payments() {
                   <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400 text-xs">{p.due}</td>
                   <td className="px-5 py-3.5">
                     {isAdmin
-                      ? <StatusDropdown paymentId={p.id} current={p.status} onUpdate={updatePayment} />
+                      ? <StatusDropdown id={p.id} current={p.status} onUpdate={(id, s) => updatePayment(id, { status: s })} onSelectPaid={id => setPaidInvoiceTarget(id)} />
                       : <span className={clsx('text-xs px-2.5 py-1 rounded-full font-medium', statusBadge[p.status])}>{p.status}</span>
                     }
+                    {p.status === 'Paid' && p.paymentMode && (
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1">
+                        via {p.paymentMode}{p.paymentDetail ? ` · ${p.paymentDetail}` : ''}{p.paidAmount ? ` · ₹${Number(p.paidAmount).toLocaleString()}` : ''}
+                      </p>
+                    )}
                   </td>
                   <td className="px-5 py-3.5 text-right">
                     {isAdmin && (
@@ -586,6 +538,13 @@ export default function Payments() {
           clientName={clients.find(c => c.id === paidClientTarget)?.name ?? ''}
           onClose={() => setPaidClientTarget(null)}
           onConfirm={handleClientPaidConfirm}
+        />
+      )}
+      {paidInvoiceTarget && (
+        <MarkClientPaidModal
+          clientName={(() => { const p = payments.find(x => x.id === paidInvoiceTarget); return p ? `${p.id} · ${p.client}` : ''; })()}
+          onClose={() => setPaidInvoiceTarget(null)}
+          onConfirm={handleInvoicePaidConfirm}
         />
       )}
     </div>
